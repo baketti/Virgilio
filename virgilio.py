@@ -21,6 +21,15 @@ class Virgilio():
         return len(hell_verses)
 
     def count_tercets(self, canto_number):
+        """
+            Counts the number of tercets in a 'canto';
+            if the number of verses in the canto is not divisible by 3, 
+            the excess verses are not counted (rounding down).
+            :param canto_number: number of the canto
+            :type canto_number: ``int``
+            :return: number of tercets in the canto
+            :rtype: ``int``
+        """
         canto_verses = self.read_canto_lines(canto_number)
         canto_verses = self.count_verses(canto_number)
         return canto_verses // 3
@@ -30,10 +39,29 @@ class Virgilio():
         return len(canto_verses)
 
     def count_word(self, canto_number, word):
+        """
+            Counts how many times the word appears in the 'canto';
+            :param canto_number: number of the canto
+            :type canto_number: ``int``
+            :param word: word to count
+            :type word: ``str``
+            :return: number of times the word appears in the canto
+            :rtype: ``int``
+        """
         canto_verses = self.read_canto_lines(canto_number)
         return " ".join(canto_verses).count(word)
 
     def count_words(self, canto_number, words):
+        """
+            Counts how many times each word in the list appears in the 'canto' 
+            and saves the result to a JSON file;
+            :param canto_number: number of the canto
+            :type canto_number: ``int``
+            :param words: list of words to count
+            :type words: ``list``
+            :return: dictionary with words as keys and their counts as values
+            :rtype: ``dict``
+        """
         words_counter = {}
         for word in words:
             words_counter[word] = self.count_word(canto_number, word)
@@ -52,6 +80,13 @@ class Virgilio():
         return words_counter
 
     def get_hell_verses(self):
+        """
+            Retrieves all verses from all canti in the Inferno.
+            Iterates for the number of canti to read their lines and append
+            each verse to a list;
+            :return: a list containing all verses from all canti.
+            :rtype: ``list``
+        """
         hell_verses = []
         for i in range(CANTI_QUANTITY):
             canto_number = i + 1
@@ -61,6 +96,14 @@ class Virgilio():
         return hell_verses
     
     def get_hell_verse_mean_len(self):
+        """
+            Calculates the mean length of all verses in the Inferno.
+            Retrieves all verses, sanitizes them by removing specified 
+            characters, and calculates the mean length.
+            :return: - the mean length of all verses; 
+                     - None if no verses are found;
+            :rtype: ``float`` or None
+        """
         hell_verses = self.get_hell_verses()
         all_hell_verses_len = 0
         all_hell_verses_tot = self.count_hell_verses()
@@ -69,12 +112,21 @@ class Virgilio():
             all_hell_verses_len += len(sanitized_verse)
         try:
             hell_verse_mean_len = all_hell_verses_len / all_hell_verses_tot
+            return round(hell_verse_mean_len, 2)
         except ZeroDivisionError:
             print("No verses found, can't calculate mean length")
-        else:
-            return round(hell_verse_mean_len, 2)
 
     def get_longest_canto(self):
+        """
+            Finds and returns the longest canto in the Inferno.
+            Iterates for the number of canti to read their lines and determines 
+            the canto with the most verses. 
+            If multiple canti have the same number of verses, 
+            the first longest one is returned.
+            :return: dictionary with the number of the longest canto and its 
+            length.
+            :rtype: ``dict``
+        """
         longest_canto = {
             'canto_number': 0,
             'canto_len': 0,
@@ -90,6 +142,14 @@ class Virgilio():
         return longest_canto
     
     def get_longest_verse(self, canto_number):
+        """
+            Finds and returns the longest verse in the canto.
+            Iterates through all verses in the canto and determines the longest;
+            if multiple verses have the same number of characters, 
+            the first longest one is returned.
+            :return: the longest verse in the canto
+            :rtype: ``str``
+        """
         canto_verses = self.read_canto_lines(canto_number)
         verse_len = 0
         longest_verse = ""
@@ -101,6 +161,17 @@ class Virgilio():
         return longest_verse
         
     def get_verse_with_word(self, canto_number, word):
+        """
+            Retrieves all verses from the canto containing the word.
+            Iterates through all verses in the canto and appends to a list each
+            verse which contains the word.
+            :param canto_number: number of the canto
+            :type canto_number: ``int``
+            :param word: word to search for
+            :type word: ``str``
+            :return: list of verses containing the word
+            :rtype: ``list``
+        """
         canto_verses = self.read_canto_lines(canto_number)
         verses_with_word = []
         for verse in canto_verses:
@@ -110,6 +181,20 @@ class Virgilio():
         return verses_with_word
     
     def read_canto_lines(self, canto_number, strip_lines=False, num_lines=None):
+        """
+            Retrieves the lines from the specified canto file. 
+            Optionally strips specified characters from each line and limits
+            the number of lines to retrieve.
+            :param canto_number: number of the canto to read
+            :type canto_number: ``int``
+            :param strip_lines: whether to strip specified characters from each 
+                                line
+            :type strip_lines: ``bool``, optional
+            :param num_lines: number of lines to read
+            :type num_lines: ``int``, optional
+            :return: list of verses from the specified canto
+            :rtype: ``list``
+        """
         if not isinstance(canto_number, int):
             raise TypeError("canto_number must be an integer")
         if canto_number < 1 or canto_number > CANTI_QUANTITY:
