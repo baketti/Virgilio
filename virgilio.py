@@ -2,27 +2,36 @@ import json
 import os
 import string
 
-CANTI_DIRNAME = 'PATH_TO_YOUR_CANTI_DIRECTORY'
-CANTI_QUANTITY = 34
-CHARS_TO_EXCLUDE = string.punctuation + ' ' + '\n' + '«' + '»' + '’'
-
 
 class Virgilio():
-    class CantoNotFoundError(Exception):
-        def __init__(self, message):
-            self.message = message
-            super().__init__(self.message)
+    CANTI_DIRNAME = 'PATH_TO_YOUR_CANTI_DIRECTORY'
+    CANTI_QUANTITY = 34
+    CHARS_TO_EXCLUDE = string.punctuation + ' ' + '\n' + '«' + '»' + '’'
 
     def __init__(self, directory):
         self.directory = directory
 
+    class CantoNotFoundError(Exception):
+        """
+            Exception raised when the canto_number provided is out of range
+            (not between 1 and the canti quantity).
+        """
+        def __init__(self, message):
+            self.message = message
+            super().__init__(self.message)
+
     def count_hell_verses(self):
+        """
+            Calculates the total number of verses in the Inferno.
+            :return: number of verses in the Inferno
+            :rtype: ``int``
+        """
         hell_verses = self.get_hell_verses()
         return len(hell_verses)
 
     def count_tercets(self, canto_number):
         """
-            Counts the number of tercets in a 'canto';
+            Calculates the number of tercets in a 'canto';
             if the number of verses in the canto is not divisible by 3, 
             the excess verses are not counted (rounding down).
             :param canto_number: number of the canto
@@ -35,6 +44,13 @@ class Virgilio():
         return canto_verses // 3
 
     def count_verses(self, canto_number):
+        """
+            Calculates the number of verses in a 'canto'.
+            :param canto_number: number of the canto
+            :type canto_number: ``int``
+            :return: number of verses in the canto
+            :rtype: ``int``
+        """
         canto_verses = self.read_canto_lines(canto_number)
         return len(canto_verses)
 
@@ -84,11 +100,11 @@ class Virgilio():
             Retrieves all verses from all canti in the Inferno.
             Iterates for the number of canti to read their lines and append
             each verse to a list;
-            :return: a list containing all verses from all canti.
+            :return: a list containing all verses from all canti
             :rtype: ``list``
         """
         hell_verses = []
-        for i in range(CANTI_QUANTITY):
+        for i in range(Virgilio.CANTI_QUANTITY):
             canto_number = i + 1
             canto_verses = self.read_canto_lines(canto_number)
             for verse in canto_verses:
@@ -100,18 +116,17 @@ class Virgilio():
             Calculates the mean length of all verses in the Inferno.
             Retrieves all verses, sanitizes them by removing specified 
             characters, and calculates the mean length.
-            :return: - the mean length of all verses; 
-                     - None if no verses are found;
-            :rtype: ``float`` or None
+            :return: the mean length of all verses,
+                     None if no verses are found
+            :rtype: ``float`` or ``None``
         """
         hell_verses = self.get_hell_verses()
-        all_hell_verses_len = 0
-        all_hell_verses_tot = self.count_hell_verses()
+        hell_verses_len = 0
         for verse in hell_verses:
-            sanitized_verse = verse.strip(CHARS_TO_EXCLUDE)
-            all_hell_verses_len += len(sanitized_verse)
+            sanitized_verse = verse.strip(Virgilio.CHARS_TO_EXCLUDE)
+            hell_verses_len += len(sanitized_verse)
         try:
-            hell_verse_mean_len = all_hell_verses_len / all_hell_verses_tot
+            hell_verse_mean_len = hell_verses_len / len(hell_verses)
             return round(hell_verse_mean_len, 2)
         except ZeroDivisionError:
             print("No verses found, can't calculate mean length")
@@ -124,14 +139,14 @@ class Virgilio():
             If multiple canti have the same number of verses, 
             the first longest one is returned.
             :return: dictionary with the number of the longest canto and its 
-            length.
+                     length
             :rtype: ``dict``
         """
         longest_canto = {
             'canto_number': 0,
             'canto_len': 0,
         }
-        for i in range(CANTI_QUANTITY):
+        for i in range(Virgilio.CANTI_QUANTITY):
             canto_number = i+1
             canto_verses = self.read_canto_lines(canto_number)
             longest_canto_len = longest_canto["canto_len"]
@@ -147,6 +162,8 @@ class Virgilio():
             Iterates through all verses in the canto and determines the longest;
             if multiple verses have the same number of characters, 
             the first longest one is returned.
+            :param canto_number: number of the canto
+            :type canto_number: ``int``
             :return: the longest verse in the canto
             :rtype: ``str``
         """
@@ -197,9 +214,9 @@ class Virgilio():
         """
         if not isinstance(canto_number, int):
             raise TypeError("canto_number must be an integer")
-        if canto_number < 1 or canto_number > CANTI_QUANTITY:
+        if canto_number < 1 or canto_number > Virgilio.CANTI_QUANTITY:
             raise self.CantoNotFoundError(
-                "canto_number must be between 1 and 34"
+                f"canto_number must be between 1 and {Virgilio.CANTI_QUANTITY}"
             )
         canto_basename = f"Canto_{canto_number}.txt"
         canto_path = os.path.join(self.directory, canto_basename)
@@ -208,7 +225,8 @@ class Virgilio():
             with open(canto_path, "r", encoding = "utf-8") as canto:
                 for verse in canto:
                     canto_verses.append(
-                        verse.strip(CHARS_TO_EXCLUDE) if strip_lines else verse
+                        verse.strip(Virgilio.CHARS_TO_EXCLUDE) if strip_lines
+                        else verse
                     )
                     if len(canto_verses) == num_lines:
                         break
@@ -218,6 +236,4 @@ class Virgilio():
             print(f"error while opening '{canto_path}'")
         return canto_verses
 
-virgilio = Virgilio(CANTI_DIRNAME)
-hell_verse_mean_len = virgilio.get_hell_verse_mean_len()
-print("hell_verse_mean_len => ", hell_verse_mean_len)
+virgilio = Virgilio(Virgilio.CANTI_DIRNAME)
