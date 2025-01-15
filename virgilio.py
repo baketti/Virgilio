@@ -4,7 +4,6 @@ import string
 
 
 class Virgilio():
-    CANTI_DIRNAME = 'PATH_TO_YOUR_CANTI_DIRECTORY'
     CANTI_QUANTITY = 34
     CHARS_TO_EXCLUDE = string.punctuation + ' ' + '\n' + '«' + '»' + '’'
 
@@ -236,4 +235,4 @@ class Virgilio():
             print(f"error while opening '{canto_path}'")
         return canto_verses
 
-virgilio = Virgilio(Virgilio.CANTI_DIRNAME)
+virgilio = Virgilio('PATH_TO_YOUR_CANTI_DIRECTORY')
